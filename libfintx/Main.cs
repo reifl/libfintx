@@ -31,6 +31,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 using static libfintx.HKCDE;
 
@@ -45,6 +46,7 @@ namespace libfintx
         /// <summary>
         /// Resets all temporary values. Should be used when switching to another bank connection.
         /// </summary>
+        static int x = 100;
         public static void Reset()
         {
             Segment.Reset();
@@ -132,6 +134,7 @@ namespace libfintx
             var BankCode = Transaction.HKKAZ(connectionDetails, startDateStr, endDateStr, null);
             var messages = Helper.Parse_BankCode(BankCode);
             var result = new HBCIDialogResult<List<SWIFTStatement>>(messages);
+            StringBuilder sb = new StringBuilder();
             if (!result.IsSuccess)
                 return result;
 
@@ -141,10 +144,11 @@ namespace libfintx
                 Transactions = ":20:" + Helper.Parse_String(BankCode, ":20:", "'HNSHA");
             else // -> Postbank finishes with HNHBS
                 Transactions = ":20:" + Helper.Parse_String(BankCode, ":20:", "'HNHBS");
-
-            swiftStatements.AddRange(MT940.Serialize(Transactions, connectionDetails.Account));
+            sb.Append(Transactions);
+            //swiftStatements.AddRange(MT940.Serialize(Transactions, connectionDetails.Account));
 
             string BankCode_ = BankCode;
+            
             while (BankCode_.Contains("+3040::"))
             {
                 Helper.Parse_Message(BankCode_);
@@ -160,9 +164,10 @@ namespace libfintx
 
                 var Transactions_ = startToken + Helper.Parse_String(BankCode_, startToken, "'HNSHA");
 
-                swiftStatements.AddRange(MT940.Serialize(Transactions_, connectionDetails.Account));
+                sb.Append(Transactions_);
+                //swiftStatements.AddRange(MT940.Serialize(Transactions_, connectionDetails.Account));
             }
-
+            swiftStatements.AddRange(MT940.Serialize(sb.ToString(), connectionDetails.Account));
             result.Data = swiftStatements;
 
             return result;

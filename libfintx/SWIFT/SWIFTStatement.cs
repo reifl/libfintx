@@ -42,6 +42,8 @@ namespace libfintx
 
         public DateTime date;
 
+        public bool containsError = false;
+
         public List<SWIFTTransaction> SWIFTTransactions = new List<SWIFTTransaction>();
 
         public List<SWIFTLine> lines = new List<SWIFTLine>();

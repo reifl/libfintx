@@ -43,6 +43,7 @@ namespace libfintx
         /// <summary>
         /// Regex pattern for HIRMG/HIRMS messages.
         /// </summary>
+        static int x;
         private const string PatternResultMessage = @"(\d{4}):.*?:(.+)";
 
         /// <summary>
@@ -110,6 +111,9 @@ namespace libfintx
         /// <returns></returns>
         static public string DecodeFrom64EncodingDefault(string encodedData)
         {
+            
+            x++;
+            System.IO.File.AppendAllText("C:\\temp\\test" + x.ToString() + ".txt", encodedData, Encoding.UTF8);
             byte[] encodedDataAsBytes = Convert.FromBase64String(encodedData);
             string returnValue = Encoding.GetEncoding("ISO-8859-1").GetString(encodedDataAsBytes);
 

@@ -468,6 +468,7 @@ namespace libfintx
 
             string swiftTag = "";
             string swiftData = "";
+            bool tilEnd = false;
 
             SWIFTStatements = new List<SWIFTStatement>();
             SWIFTStatement = null;
@@ -514,7 +515,14 @@ namespace libfintx
                         // Process previously read swift chunk
                         if (swiftTag.Length > 0)
                         {
-                            Data(swiftTag, swiftData);
+                            try
+                            {
+                                Data(swiftTag, swiftData);
+                            } catch (Exception ex)
+                            {
+                                tilEnd = true;
+                                SWIFTStatement.containsError = true;
+                            }
                         }
 
                         int posColon = line.IndexOf(":", 2);
@@ -526,13 +534,22 @@ namespace libfintx
                     {
                         // The swift chunk is spread over several lines
                         swiftData = swiftData + line;
+                        SWIFTStatement.containsError = true;
                     }
                 }
             }
 
             if (swiftTag.Length > 0)
             {
-                Data(swiftTag, swiftData);
+                try
+                {
+                    Data(swiftTag, swiftData);
+                }
+                catch (Exception ex)
+                {
+                    tilEnd = true;
+                    SWIFTStatement.containsError = true;
+                }
             }
 
             // If there are remaining unprocessed statements - add them
